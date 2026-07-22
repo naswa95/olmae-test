@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Olmaé — Questionnaire test</title>
+  <meta name="description" content="Questionnaire de démonstration Olmaé connecté à Google Sheets.">
+  <meta name="theme-color" content="#394436">
+
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="apple-touch-icon" href="icon.png">
+
+  <style>
+    :root {
+      --background: #f4f0e7;
+      --surface: #fffdf8;
+      --surface-soft: #ebe4d7;
+      --olive: #394436;
+      --olive-dark: #283126;
+      --olive-light: #6f7a67;
+      --gold: #b89a5e;
+      --text: #2d302b;
+      --muted: #75766f;
+      --border: #d7cdbd;
+      --error: #a43c36;
+      --success: #49694a;
+      --shadow: 0 24px 70px rgba(49, 54, 45, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(217,205,185,.6), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(111,122,103,.14), transparent 30%),
+        var(--background);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button, input { font: inherit; }
+
+    .page {
+      display: grid;
+      min-height: 100vh;
+      place-items: center;
+      padding: 28px;
+    }
+
+    .card {
+      width: min(100%, 680px);
+      overflow: hidden;
+      background: rgba(255,253,248,.97);
+      border: 1px solid rgba(101,87,67,.16);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 28px;
+      border-bottom: 1px solid rgba(101,87,67,.12);
+    }
+
+    .top-logo {
+      width: min(230px, 70%);
+      height: auto;
+      display: block;
+    }
+
+    .content {
+      padding: clamp(30px, 7vw, 62px);
+    }
+
+    .eyebrow {
+      margin: 0 0 16px;
+      color: var(--olive-light);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1, h2 {
+      margin: 0;
+      color: var(--olive);
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 500;
+      line-height: 1.08;
+    }
+
+    h1 { font-size: clamp(40px, 7vw, 64px); }
+    h2 { font-size: clamp(34px, 6vw, 48px); }
+
+    .intro {
+      margin: 22px 0 36px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .field { margin-bottom: 22px; }
+
+    .field label {
+      display: block;
+      margin-bottom: 9px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      padding: 16px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      outline: none;
+      transition: border-color .2s ease, box-shadow .2s ease;
+    }
+
+    input:focus {
+      border-color: var(--olive);
+      box-shadow: 0 0 0 4px rgba(57,68,54,.11);
+    }
+
+    input[aria-invalid="true"] { border-color: var(--error); }
+
+    .field-error {
+      min-height: 18px;
+      margin: 7px 0 0;
+      color: var(--error);
+      font-size: 13px;
+    }
+
+    .consent-box {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      margin: 28px 0 8px;
+      padding: 16px;
+      background: var(--surface-soft);
+      border-radius: 13px;
+    }
+
+    .consent-box input {
+      margin-top: 3px;
+      accent-color: var(--olive);
+    }
+
+    .consent-box label {
+      color: #585b54;
+      line-height: 1.55;
+    }
+
+    .global-message {
+      display: none;
+      margin-bottom: 22px;
+      padding: 14px;
+      border-radius: 11px;
+      line-height: 1.5;
+    }
+
+    .global-message.visible { display: block; }
+
+    .global-message.error {
+      color: var(--error);
+      background: #fff1ef;
+      border: 1px solid #efc6c1;
+    }
+
+    .submit-button,
+    .secondary-button {
+      width: 100%;
+      padding: 16px 20px;
+      cursor: pointer;
+      border-radius: 999px;
+      font-weight: 700;
+      transition: transform .2s ease, background .2s ease, opacity .2s ease;
+    }
+
+    .submit-button {
+      color: white;
+      background: var(--olive);
+      border: none;
+    }
+
+    .submit-button:hover {
+      background: var(--olive-dark);
+      transform: translateY(-1px);
+    }
+
+    .submit-button:disabled {
+      cursor: wait;
+      opacity: .65;
+      transform: none;
+    }
+
+    .secondary-button {
+      color: var(--olive);
+      background: transparent;
+      border: 1px solid var(--olive);
+    }
+
+    .secondary-button:hover { background: #f0f2eb; }
+
+    .privacy {
+      margin: 20px 0 0;
+      color: #898a83;
+      font-size: 12px;
+      line-height: 1.55;
+      text-align: center;
+    }
+
+    .success-view {
+      display: none;
+      text-align: center;
+    }
+
+    .success-view.visible { display: block; }
+
+    .success-icon {
+      display: grid;
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 24px;
+      place-items: center;
+      color: white;
+      background: var(--success);
+      border-radius: 50%;
+      font-size: 32px;
+    }
+
+    .success-view p {
+      margin: 20px 0 30px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .shop-footer {
+      padding: 28px;
+      text-align: center;
+      background: #eee8dc;
+      border-top: 1px solid rgba(101,87,67,.12);
+    }
+
+    .shop-footer p {
+      margin: 0 0 15px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .shop-link {
+      display: inline-block;
+      border-radius: 16px;
+      transition: transform .2s ease, opacity .2s ease;
+    }
+
+    .shop-link:hover {
+      transform: translateY(-2px);
+      opacity: .85;
+    }
+
+    .shop-logo {
+      display: block;
+      width: min(260px, 72vw);
+      height: auto;
+    }
+
+    .honeypot {
+      position: absolute !important;
+      left: -10000px !important;
+      width: 1px !important;
+      height: 1px !important;
+      overflow: hidden !important;
+    }
+
+    [hidden] { display: none !important; }
+
+    @media (max-width: 540px) {
+      .page { padding: 12px; }
+      .card { border-radius: 22px; }
+      .topbar { padding: 18px 20px; }
+      .content { padding: 34px 22px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="card">
+      <header class="topbar">
+        <img class="top-logo" src="logo_site.png" alt="Olmaé">
+      </header>
+
+      <div class="content">
+        <div id="formView">
+          <p class="eyebrow">Questionnaire test</p>
+          <h1>Faisons connaissance.</h1>
+
+          <p class="intro">
+            Remplissez ce formulaire pour vérifier que les réponses sont bien
+            envoyées dans notre espace Google Sheets sécurisé.
+          </p>
+
+          <div id="globalMessage" class="global-message" role="alert"></div>
+
+          <form id="testForm" novalidate>
+            <div class="field">
+              <label for="nom">Nom</label>
+              <input id="nom" name="nom" type="text" maxlength="80"
+                     autocomplete="family-name" placeholder="Exemple : Martin" required>
+              <p id="nomError" class="field-error"></p>
+            </div>
+
+            <div class="field">
+              <label for="prenom">Prénom</label>
+              <input id="prenom" name="prenom" type="text" maxlength="80"
+                     autocomplete="given-name" placeholder="Exemple : Léa" required>
+              <p id="prenomError" class="field-error"></p>
+            </div>
+
+            <div class="field">
+              <label for="age">Âge</label>
+              <input id="age" name="age" type="number" min="18" max="100" step="1"
+                     inputmode="numeric" placeholder="Exemple : 30" required>
+              <p id="ageError" class="field-error"></p>
+            </div>
+
+            <div class="honeypot" aria-hidden="true">
+              <label for="website">Ne pas remplir ce champ</label>
+              <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+
+            <div class="consent-box">
+              <input id="consentement" name="consentement" type="checkbox" required>
+              <label for="consentement">
+                J’accepte que ces informations soient enregistrées uniquement
+                dans le cadre de ce test.
+              </label>
+            </div>
+            <p id="consentementError" class="field-error"></p>
+
+            <button id="submitButton" class="submit-button" type="submit">
+              Envoyer ma réponse
+            </button>
+
+            <p class="privacy">
+              Pour ce test, vous pouvez utiliser des informations fictives.
+            </p>
+          </form>
+        </div>
+
+        <div id="successView" class="success-view">
+          <div class="success-icon">✓</div>
+          <h2>Réponse envoyée</h2>
+          <p>
+            Merci. Votre réponse a été transmise avec succès.
+          </p>
+          <button id="restartButton" class="secondary-button" type="button">
+            Envoyer une autre réponse
+          </button>
+        </div>
+      </div>
+
+      <footer class="shop-footer">
+        <p>Pour en savoir plus sur notre boutique</p>
+        <a
+          class="shop-link"
+          href="https://www.olmae.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Découvrir la boutique Olmaé"
+        >
+          <img class="shop-logo" src="logo_site.png" alt="Découvrir Olmaé">
+        </a>
+      </footer>
+    </section>
+  </main>
+
+  <script>
+    const GOOGLE_SCRIPT_URL =
+      "https://script.google.com/macros/s/AKfycby31ybi-0JzXKlgQYDSq5wLRoA8e2r2kHwVqWZBtzHxRlDKy4K1q_g88nryDfs6HegZ/exec";
+
+    const form = document.getElementById("testForm");
+    const submitButton = document.getElementById("submitButton");
+    const globalMessage = document.getElementById("globalMessage");
+    const formView = document.getElementById("formView");
+    const successView = document.getElementById("successView");
+    const restartButton = document.getElementById("restartButton");
+
+    function setFieldError(fieldName, message) {
+      const field = document.getElementById(fieldName);
+      const error = document.getElementById(fieldName + "Error");
+      error.textContent = message;
+      field.setAttribute("aria-invalid", message ? "true" : "false");
+    }
+
+    function showGlobalError(message) {
+      globalMessage.textContent = message;
+      globalMessage.className = "global-message error visible";
+    }
+
+    function clearMessages() {
+      globalMessage.textContent = "";
+      globalMessage.className = "global-message";
+      setFieldError("nom", "");
+      setFieldError("prenom", "");
+      setFieldError("age", "");
+      document.getElementById("consentementError").textContent = "";
+    }
+
+    function validateForm() {
+      const nom = document.getElementById("nom").value.trim();
+      const prenom = document.getElementById("prenom").value.trim();
+      const ageText = document.getElementById("age").value;
+      const age = Number(ageText);
+      const consentement = document.getElementById("consentement").checked;
+
+      clearMessages();
+      let isValid = true;
+
+      if (!nom) {
+        setFieldError("nom", "Indiquez votre nom.");
+        isValid = false;
+      }
+
+      if (!prenom) {
+        setFieldError("prenom", "Indiquez votre prénom.");
+        isValid = false;
+      }
+
+      if (!ageText || !Number.isInteger(age) || age < 18 || age > 100) {
+        setFieldError("age", "Indiquez un âge entier compris entre 18 et 100.");
+        isValid = false;
+      }
+
+      if (!consentement) {
+        document.getElementById("consentementError").textContent =
+          "Le consentement est obligatoire pour envoyer le formulaire.";
+        isValid = false;
+      }
+
+      return { isValid, nom, prenom, age };
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const values = validateForm();
+      if (!values.isValid) return;
+
+      submitButton.disabled = true;
+      submitButton.textContent = "Envoi en cours…";
+
+      const payload = {
+        nom: values.nom,
+        prenom: values.prenom,
+        age: values.age,
+        website: document.getElementById("website").value
+      };
+
+      try {
+        await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        formView.hidden = true;
+        successView.classList.add("visible");
+      } catch (error) {
+        console.error(error);
+        showGlobalError(
+          "L’envoi a échoué. Vérifiez votre connexion puis réessayez."
+        );
+      } finally {
+        submitButton.disabled = false;
+        submitButton.textContent = "Envoyer ma réponse";
+      }
+    });
+
+    restartButton.addEventListener("click", () => {
+      form.reset();
+      clearMessages();
+      successView.classList.remove("visible");
+      formView.hidden = false;
+      document.getElementById("nom").focus();
+    });
+  </script>
+</body>
+</html>
